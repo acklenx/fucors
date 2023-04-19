@@ -1,30 +1,64 @@
-const express = require('express');
-const fetch = require('node-fetch');
-const app = express();
+const express = require( 'express' ),
+	request = require( 'request' ),
+	fucors  = express();
 
-// Set up a simple proxy server
-app.get('/', async (req, res) => {
-	try {
-		// Forward the request to the desired API endpoint
-		const url = req.query.url;
-		const response = await fetch(url);
+fucors.all( '*', function( req, res, next )
+{
+	console.log("request received");
+	// Set CORS headers: allow all origins, methods, and headers: you may want to lock this down in a production environment
+	res.header( "Access-Control-Allow-Origin", "*" );
+	res.header( "Access-Control-Allow-Methods", "GET, PUT, PATCH, POST, DELETE" );
+	res.header( "Access-Control-Allow-Headers", req.header( 'access-control-request-headers' ) );
 
-		// Set the CORS headers to allow any origin to access the API
-		res.set('Access-Control-Allow-Origin', '*');
-		res.set('Access-Control-Allow-Methods', 'GET');
-		res.set('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-
-		// Send the API response back to the client
-		const data = await response.json();
-		res.json(data);
-	} catch (error) {
-		console.error(error);
-		res.status(500).send(error.message);
+	if( req.method === 'OPTIONS' )
+	{
+		res.send(); // CORS Preflight
 	}
-});
+	else
+	{
+		const targetURL = req.header( 'url' );
+		if( !targetURL )
+		{
+			res.send( 500, { error: 'FU! There is no Target-Endpoint header in the request (url)' } );
+		}
+		else
+		{
+			const authKey = req.header( 'qla' );
+			console.log( "authKey", authKey );
+			if( !authKey )
+			{
+				res.send( 500, { error: "FU!  -hugs and kisses, CORS" } );
+			}
+			else if( authKey.length !== 7 )
+			{
+				if( authKey.length < 10 )
+				{
+					res.send( 500, { error: "FU! API key too short. (hint: they are at least 10 alphanumeric characters" } );
+				}
+				else
+				{
+					res.send( 500, { error: "FU! Bad API key. Has it expired?" } );
+				}
+			}
+			else
+			{
 
-// Start the server
-const port = process.env.PORT || 3000;
-app.listen(port, () => {
-	console.log(`Server listening on port ${port}`);
-});
+				console.log( "req.url", req.url );
+				request(
+					{ url: targetURL + req.url, method: req.method, json: req.body },
+					function( error, response, body )
+					{
+						if( error )
+						{
+							console.error( 'error: ' + response.statusCode );
+						}
+					}
+				).pipe( res );
+			}
+		}
+	}
+} );
+
+module.exports = {
+	fucors
+};
