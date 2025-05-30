@@ -32,6 +32,8 @@ Where:
     -   `FETCH`: Can also be used (interchangeably with `GET` or `POST` depending on context, as per original `thingproxy` logic).
 -   `{target_URL}`: The full, URL-encoded URL of the API endpoint you want to proxy. For example, if you want to access `http://example.com/data?id=123`, this part would be `http%3A%2F%2Fexample.com%2Fdata%3Fid%3D123`.
 
+    **Note on URL Encoding**: The `{target_URL}` (e.g., `http://example.com/api?query=value`) should be provided directly as part of the path. Your browser or HTTP client will handle any necessary URL encoding for the overall proxy request path. For example, `http://` within the `{target_URL}` part will remain `http://` and does not need to be manually changed to `http%3A%2F%2F` by you when constructing the proxy URL. The examples below show the `target_URL` part already encoded as it would appear in the *final* proxy URL path.
+
 **Examples:**
 
 **GET Request:**
@@ -81,6 +83,10 @@ Several server-side configurations can be adjusted by modifying the `config.js` 
 -   `blacklist_hostname_regex`: A regex to blacklist certain hostnames from being proxied (e.g., internal IPs).
 
 Remember to redeploy your Netlify function if you change `config.js`.
+
+## Authentication
+
+The currently deployed version of this proxy on Netlify does not implement any specific authentication mechanism. The experimental `proxy.js` file in the repository contains some authentication logic, but that file is not part of the active Netlify deployment.
 
 ## Based On
 
