@@ -2,7 +2,7 @@
   "name": "fucors",
   "version": "0.1",
   "description": "A simple forward proxy server for processing API calls to servers that don't send CORS headers or support HTTPS based on thingproxy.freeboard.io",
-  "main": "server.js",
+  "main": "netlify/functions/server.js",
   "license": "MIT",
   "dependencies": {
     "request": "2.88.2"
